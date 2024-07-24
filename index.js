@@ -47,6 +47,7 @@ const generateId = () => {
 
 app.post('/api/persons', postMorgan, (request, response) => {
     const body = request.body
+    console.log(request.body)
     if(!body.name || !body.number) {
         return response.status(400).json({
             error: 'Name or number missing'
