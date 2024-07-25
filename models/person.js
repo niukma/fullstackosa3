@@ -19,7 +19,7 @@ const personSchema = new mongoose.Schema({
   name: {
     type: String,
     minLength: 3,
-    required: true
+    required: [true, 'Name is required']
   },
   number: {
     type: String,
@@ -30,7 +30,7 @@ const personSchema = new mongoose.Schema({
       message: props => `${props.value} is not a valid phone number!`
     },
     minLength: 8,
-    required: true
+    required: [true, 'Number is required']
   }
 })
 
