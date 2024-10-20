@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 
 mongoose.set('strictQuery', false)
 
-
+// url, on omalla koneella tallenetussa .env tiedostossa.
 const url = process.env.MONGODB_URI
 console.log(url)
 console.log('connecting to', url)

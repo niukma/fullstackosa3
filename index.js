@@ -5,6 +5,7 @@ app.use(express.json())
 const morgan = require('morgan')
 const cors = require('cors')
 const Person = require('./models/person')
+const postMorgan = morgan(':method :url :status :res[content-length] - :response-time ms :body')
 
 
 app.use(cors())
@@ -13,26 +14,29 @@ morgan.token('body', (request) => JSON.stringify(request.body))
 app.use(morgan('tiny'))
 
 
+// Hakee databasessa olevat ihmiset ja antaa json responsen
 app.get('/api/persons',(request, response, next) => {
   Person
     .find({})
     .then(result => {
       response.json(result)
-      console.log(result)
     })
     .catch(error => next(error))
 })
 
+// Hakee databasesta taulukon ja tarkastaa monta yksilöä siinä on. Antaa ihmisten määrän ja päivämäärän tuloksena.
 app.get('/info', (request, response) => {
-  response.send(`
-        <p>Phonebook has info for ${Person.length} people</p>
-        <p>${Date()}</p>
-        `)
+  Person
+    .find({})
+    .then(result => {
+      response.send(`
+      <p>Phonebook has info for ${result.length} people</p>
+      <p>${Date()}</p>
+      `)
+    })
 })
 
-
-const postMorgan = morgan(':method :url :status :res[content-length] - :response-time ms :body')
-
+// Käsittelee lisäyksen, tarkemmin post pyynnön. Lisää näin name ja number kohdissa olevat tekstit ja luo niistä uuden yhteystiedon.
 app.post('/api/persons', postMorgan, (request, response, next) => {
   const body = request.body
   console.log(request.body)
@@ -51,6 +55,7 @@ app.post('/api/persons', postMorgan, (request, response, next) => {
 
 })
 
+// PUT request, jolle annetaan ID. Voi vaihtaa nimen ja numeron.
 app.put('/api/persons/:id', (request, response, next) => {
   const body = request.body
 
@@ -68,6 +73,7 @@ app.put('/api/persons/:id', (request, response, next) => {
 
 
 
+// Etsii yhteystiedon ID:n mukaan ja antaa sen takaisin. Antaa 404 jos ei löydä
 app.get('/api/persons/:id', (request, response, next) => {
   Person.findById(request.params.id)
     .then(person => {
@@ -81,7 +87,8 @@ app.get('/api/persons/:id', (request, response, next) => {
 
 })
 
-app.delete('/api/persons/:id', (request, response) => {
+// Poistaa annetun yhteystiedon (ID liitännäinen)
+app.delete('/api/persons/:id', (request, response, next) => {
   Person.findByIdAndDelete(request.params.id)
     .then(() => {
       response.status(204).end()
@@ -90,11 +97,12 @@ app.delete('/api/persons/:id', (request, response) => {
 
 })
 
+
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
 }
-
 app.use(unknownEndpoint)
+
 
 const errorHandler = (error, request, response, next) => {
   console.error(error.message)
@@ -107,7 +115,6 @@ const errorHandler = (error, request, response, next) => {
 
   next(error)
 }
-
 app.use(errorHandler)
 
 
